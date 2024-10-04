@@ -185,7 +185,11 @@ export function hexToRgb(hex: string) {
   }
 }
 
-export const getPalette = async ({ keyName, src }: { keyName: string, src: string }): Promise<{ mostSaturatedColor: string, rgbList: RGB[], hslList: HSL[] }> => {
+export const getPalette = async ({ keyName, src }: { keyName: string, src: string }): Promise<{
+  mostSaturatedColor: string
+  rgbList: RGB[]
+  hslList: HSL[]
+}> => {
   console.time(`${keyName} get palette`)
 
   const rawRes = await prominent(src, {
