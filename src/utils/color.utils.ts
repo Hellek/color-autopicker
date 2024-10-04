@@ -1,3 +1,5 @@
+import { prominent } from 'color.js'
+
 export type RGB = {
   r: number
   g: number
@@ -180,5 +182,39 @@ export function hexToRgb(hex: string) {
     r: parseInt(result[1], 16),
     g: parseInt(result[2], 16),
     b: parseInt(result[3], 16),
+  }
+}
+
+export const getPalette = async ({ keyName, src }: { keyName: string, src: string }): Promise<{ mostSaturatedColor: string, rgbList: RGB[], hslList: HSL[] }> => {
+  console.time(`${keyName} get palette`)
+
+  const rawRes = await prominent(src, {
+    amount: 10,
+    group: 30,
+    // sample: 100, // accuracy/performance https://github.com/luukdv/color.js/?tab=readme-ov-file#sample
+  })
+
+  // eslint-disable-next-line max-len
+  const colorsListRGB = (rawRes as number[][]).map((item: number[]) => ({ r: item[0], g: item[1], b: item[2] })) as RGB[]
+  const colorsListHSL = colorsListRGB.map(RGBToHSL).filter(hsl => hsl.l > 10 && hsl.l < 90 && hsl.h !== 0)
+
+  const colorsListHSLSortedBySaturation = [...colorsListHSL].sort((item1, item2) => {
+    if (!item1) return 1
+    if (!item2) return -1
+    if (item2.s === item1.s) return item2.l - item1.l
+    return item2.s - item1.s
+  })
+
+  const colorsListHexSortedBySaturation = colorsListHSLSortedBySaturation.map(hslToHex)
+
+  const mostSaturatedColor = colorsListHexSortedBySaturation[0]
+  const rgbСolorsListSorted = colorsListHexSortedBySaturation.map(hexToRgb)
+
+  console.timeEnd(`${keyName} get palette`)
+
+  return {
+    mostSaturatedColor,
+    rgbList: rgbСolorsListSorted,
+    hslList: colorsListHSLSortedBySaturation,
   }
 }

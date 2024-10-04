@@ -1,50 +1,36 @@
 /* eslint-disable no-console */
 import './Tile.css'
 
-import { useEffect, useRef } from 'react'
-import { prominent } from 'color.js'
+import { useCallback, useEffect, useRef } from 'react'
 
 import {
   calculateColorDifference,
-  hexToRgb, hslToHex, RGB, rgbToHex, RGBToHSL,
+  getPalette, HSL, RGB, rgbToHex,
 } from '@utils'
 
 export const Tile = ({ keyName, src }: { keyName: string, src: string }) => {
   const palette = useRef<HTMLDivElement>(null)
   const button = useRef<HTMLDivElement>(null)
 
-  const buildPalette = (colorsListRGB: RGB[]) => {
+  const drawInterface = useCallback((mostSaturatedColor: string, rgbList: RGB[], hslList: HSL[]) => {
+    console.time(`${keyName} draw interface`)
     if (!palette.current || !button.current) return
 
     const paletteContainer = palette.current
     const fakeButton = button.current
 
-    const colorsListHSL = colorsListRGB.map(RGBToHSL).filter(hsl => hsl.l > 10 && hsl.l < 90)
-
-    const colorsListHSLSortedBySaturation = [...colorsListHSL].sort((item1, item2) => {
-      if (!item1) return 1
-      if (!item2) return -1
-      if (item2.s === item1.s) return item2.l - item1.l
-      return item2.s - item1.s
-    })
-
-    const colorsListHexSortedBySaturation = colorsListHSLSortedBySaturation.map(hslToHex)
-
-    const mostSaturatedColor = colorsListHexSortedBySaturation[0]
-    const rgbСolorsListSorted = colorsListHexSortedBySaturation.map(hexToRgb)
-    const orderedByColor = rgbСolorsListSorted
-
     // Проставляем цвет кнопке
     fakeButton.style.backgroundColor = mostSaturatedColor
 
-    for (let i = 0; i < orderedByColor.length; i++) {
-      const hexColor = rgbToHex(orderedByColor[i])
-      const hsl = colorsListHSLSortedBySaturation[i]
+    // Рисуем палитру
+    for (let i = 0; i < rgbList.length; i++) {
+      const hexColor = rgbToHex(rgbList[i])
+      const hsl = hslList[i]
 
       if (i > 0) {
         const difference = calculateColorDifference(
-          orderedByColor[i],
-          orderedByColor[i - 1],
+          rgbList[i],
+          rgbList[i - 1],
         )
 
         // if the distance is less than 120 we ommit that color
@@ -60,32 +46,18 @@ export const Tile = ({ keyName, src }: { keyName: string, src: string }) => {
       colorElement.appendChild(document.createTextNode(`${hexColor}, h: ${hsl.h}, s: ${hsl.s}, l: ${hsl.l}`))
       paletteContainer.appendChild(colorElement)
     }
-  }
 
-  const doJob = async () => {
-    console.time(`${keyName} get palette`)
+    console.timeEnd(`${keyName} draw interface`)
+  }, [keyName])
 
-    const rawRes = await prominent(src, {
-      amount: 10,
-      group: 30,
-      // sample: 100, // accuracy/performance https://github.com/luukdv/color.js/?tab=readme-ov-file#sample
-    })
-
-    const rgbRes = (rawRes as number[][]).map((item: number[]) => ({ r: item[0], g: item[1], b: item[2] })) as RGB[]
-
-    console.timeEnd(`${keyName} get palette`)
-
-    console.time(`${keyName} other calc`)
-    buildPalette(rgbRes)
-    console.timeEnd(`${keyName} other calc`)
-  }
+  const init = useCallback(async () => {
+    const { mostSaturatedColor, rgbList, hslList } = await getPalette({ keyName, src })
+    drawInterface(mostSaturatedColor, rgbList, hslList)
+  }, [drawInterface, keyName, src])
 
   useEffect(() => {
-    setTimeout(() => {
-      doJob()
-    }, 200)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    init()
+  }, [init])
 
   return (
     <div className="max-w-sm flex flex-col">
