@@ -1,0 +1,6 @@
+.box-container div {
+  padding: 8px;
+  display: flex;
+  justify-items: center;
+  align-items: center;
+}
