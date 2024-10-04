@@ -185,17 +185,24 @@ export function hexToRgb(hex: string) {
   }
 }
 
-export const getPalette = async ({ keyName, src }: { keyName: string, src: string }): Promise<{
+export const getPalette = async ({
+  keyName, src, colorAmount, colorGroup,
+}: {
+  keyName: string
+  src: string
+  colorAmount: number
+  colorGroup: number
+}): Promise<{
   mostSaturatedColor: string
   rgbList: RGB[]
   hslList: HSL[]
 }> => {
+  // eslint-disable-next-line no-console
   console.time(`${keyName} get palette`)
 
   const rawRes = await prominent(src, {
-    amount: 10,
-    group: 30,
-    // sample: 100, // accuracy/performance https://github.com/luukdv/color.js/?tab=readme-ov-file#sample
+    amount: colorAmount,
+    group: colorGroup,
   })
 
   // eslint-disable-next-line max-len
@@ -214,6 +221,7 @@ export const getPalette = async ({ keyName, src }: { keyName: string, src: strin
   const mostSaturatedColor = colorsListHexSortedBySaturation[0]
   const rgbСolorsListSorted = colorsListHexSortedBySaturation.map(hexToRgb)
 
+  // eslint-disable-next-line no-console
   console.timeEnd(`${keyName} get palette`)
 
   return {

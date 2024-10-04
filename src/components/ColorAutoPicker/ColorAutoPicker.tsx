@@ -91,7 +91,15 @@ const imagesList: ImageRecord[] = [
   },
 ]
 
-export const ColorAutoPicker = () => {
+export const ColorAutoPicker = ({
+  palette,
+  colorAmount,
+  colorGroup,
+}: {
+  palette: boolean
+  colorAmount: number
+  colorGroup: number
+}) => {
   // примеры https://www.figma.com/design/h2KbpDWQWYogZPVuC6ZZl9/Ads-%C3%97-Newsfeed?node-id=4617-44778
   const [images, setImages] = useState<ImageRecord[]>([imagesList[0]])
   const allImages = useMemo<ImageRecord[]>(() => imagesList, [])
@@ -113,7 +121,14 @@ export const ColorAutoPicker = () => {
   return (
     <div className="flex flex-wrap gap-5">
       {images.map(img => (
-        <Tile key={img.name} keyName={img.name} src={img.src} />
+        <Tile
+          key={img.name}
+          keyName={img.name}
+          src={img.src}
+          palette={palette}
+          colorAmount={colorAmount}
+          colorGroup={colorGroup}
+        />
       ))}
     </div>
   )

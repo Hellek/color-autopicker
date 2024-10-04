@@ -2,6 +2,7 @@
 import './Tile.css'
 
 import { useCallback, useEffect, useRef } from 'react'
+import clsx from 'clsx'
 
 import {
   calculateColorDifference,
@@ -10,15 +11,27 @@ import {
 
 export const getImageID = (keyName: string) => `img_${keyName}`
 
-export const Tile = ({ keyName, src }: { keyName: string, src: string }) => {
+export const Tile = ({
+  keyName,
+  src,
+  palette,
+  colorAmount,
+  colorGroup,
+}: {
+  keyName: string
+  src: string
+  palette: boolean
+  colorAmount: number
+  colorGroup: number
+}) => {
   const image = useRef<HTMLImageElement>(null)
   const button = useRef<HTMLDivElement>(null)
-  const palette = useRef<HTMLDivElement>(null)
+  const paletteRef = useRef<HTMLDivElement>(null)
 
   const drawInterface = useCallback((mostSaturatedColor: string, rgbList: RGB[], hslList: HSL[]) => {
-    if (!palette.current || !button.current) return
+    if (!paletteRef.current || !button.current) return
 
-    const paletteContainer = palette.current
+    const paletteContainer = paletteRef.current
     const fakeButton = button.current
 
     // Проставляем цвет кнопке
@@ -53,7 +66,10 @@ export const Tile = ({ keyName, src }: { keyName: string, src: string }) => {
   const init = useCallback(async () => {
     if (!image.current || !image.current.complete) return
 
-    const { mostSaturatedColor, rgbList, hslList } = await getPalette({ keyName, src })
+    const { mostSaturatedColor, rgbList, hslList } = await getPalette({
+      keyName, src, colorAmount, colorGroup,
+    })
+
     drawInterface(mostSaturatedColor, rgbList, hslList)
   // image.current watcher helps to detect its complete state
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -67,7 +83,7 @@ export const Tile = ({ keyName, src }: { keyName: string, src: string }) => {
     <div className="max-w-sm flex flex-col">
       <img ref={image} id={getImageID(keyName)} src={src} alt={keyName} className="w-full" />
       <div ref={button} className="fake-button text-white px-4 py-3 text-base mb-3">Купить</div>
-      <div ref={palette} className="box-container" />
+      <div ref={paletteRef} className={clsx('box-container', { hidden: !palette })} />
     </div>
   )
 }
