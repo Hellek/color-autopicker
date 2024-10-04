@@ -105,7 +105,7 @@ export const ColorAutoPicker = () => {
 
       setImages([
         ...images,
-        allImages[images.length + 1],
+        allImages[images.length],
       ])
     }, 2000)
   }, [allImages, images])
