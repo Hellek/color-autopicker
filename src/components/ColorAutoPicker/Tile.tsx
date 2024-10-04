@@ -19,22 +19,16 @@ export const Tile = ({ keyName, src }: { keyName: string, src: string }) => {
     const paletteContainer = palette.current
     const fakeButton = button.current
 
-    console.log(`${keyName} RGB`, colorsListRGB)
-
-    const colorsListHSL = colorsListRGB.map(RGBToHSL)
-    console.log(`${keyName} HSL`, colorsListHSL)
+    const colorsListHSL = colorsListRGB.map(RGBToHSL).filter(hsl => hsl.l > 10 && hsl.l < 90)
 
     const colorsListHSLSortedBySaturation = [...colorsListHSL].sort((item1, item2) => {
       if (!item1) return 1
       if (!item2) return -1
+      if (item2.s === item1.s) return item2.l - item1.l
       return item2.s - item1.s
     })
 
-    console.log(`${keyName} HSL SortedBySaturation`, colorsListHSLSortedBySaturation)
-
     const colorsListHexSortedBySaturation = colorsListHSLSortedBySaturation.map(hslToHex)
-
-    console.log(`${keyName} HEX SortedBySaturation`, colorsListHexSortedBySaturation)
 
     const mostSaturatedColor = colorsListHexSortedBySaturation[0]
     const rgbСolorsListSorted = colorsListHexSortedBySaturation.map(hexToRgb)
@@ -45,6 +39,7 @@ export const Tile = ({ keyName, src }: { keyName: string, src: string }) => {
 
     for (let i = 0; i < orderedByColor.length; i++) {
       const hexColor = rgbToHex(orderedByColor[i])
+      const hsl = colorsListHSLSortedBySaturation[i]
 
       if (i > 0) {
         const difference = calculateColorDifference(
@@ -62,20 +57,27 @@ export const Tile = ({ keyName, src }: { keyName: string, src: string }) => {
       // create the div and text elements for both colors & append it to the document
       const colorElement = document.createElement('div')
       colorElement.style.backgroundColor = hexColor
-      colorElement.appendChild(document.createTextNode(hexColor))
+      colorElement.appendChild(document.createTextNode(`${hexColor}, h: ${hsl.h}, s: ${hsl.s}, l: ${hsl.l}`))
       paletteContainer.appendChild(colorElement)
     }
   }
 
   const doJob = async () => {
-    console.time(`${keyName} time check`)
+    console.time(`${keyName} get palette`)
 
-    const rawRes = await prominent(src, { amount: 5 })
+    const rawRes = await prominent(src, {
+      amount: 10,
+      group: 30,
+      // sample: 100, // accuracy/performance https://github.com/luukdv/color.js/?tab=readme-ov-file#sample
+    })
+
     const rgbRes = (rawRes as number[][]).map((item: number[]) => ({ r: item[0], g: item[1], b: item[2] })) as RGB[]
 
+    console.timeEnd(`${keyName} get palette`)
+
+    console.time(`${keyName} other calc`)
     buildPalette(rgbRes)
-    // eslint-disable-next-line no-console
-    console.timeEnd(`${keyName} time check`)
+    console.timeEnd(`${keyName} other calc`)
   }
 
   useEffect(() => {
