@@ -207,7 +207,22 @@ export const getPalette = async ({
 
   // eslint-disable-next-line max-len
   const colorsListRGB = (rawRes as number[][]).map((item: number[]) => ({ r: item[0], g: item[1], b: item[2] })) as RGB[]
-  const colorsListHSL = colorsListRGB.map(RGBToHSL).filter(hsl => hsl.l > 10 && hsl.l < 90 && hsl.h !== 0)
+
+  const HSLFilter = (hsl: HSL) => {
+    if (hsl.s < 20) return false // везде где сатурация ниже 20 не пропускаем
+    if (hsl.s < 30 && (hsl.l > 55 || hsl.l < 35)) return false // если с ниже 30, то смотрим чтобы lightness был в диапазоне меньше 55 и больше 35
+    if (hsl.s < 40 && (hsl.l > 57 || hsl.l < 33)) return false // далее аналогично со сдвигом
+    if (hsl.s < 50 && (hsl.l > 64 || hsl.l < 31)) return false
+    if (hsl.s < 60 && (hsl.l > 70 || hsl.l < 28)) return false
+    if (hsl.s < 70 && (hsl.l > 73 || hsl.l < 21)) return false
+    if (hsl.s < 80 && (hsl.l > 76 || hsl.l < 19)) return false
+    if (hsl.s < 90 && (hsl.l > 79 || hsl.l < 17)) return false
+    if (hsl.l > 85 || hsl.l < 15) return false // если сатурация больше 90, то светимость должна быть ниже 85 и выше 15
+
+    return true
+  }
+
+  const colorsListHSL = colorsListRGB.map(RGBToHSL).filter(HSLFilter)
 
   const colorsListHSLSortedBySaturation = [...colorsListHSL].sort((item1, item2) => {
     if (!item1) return 1

@@ -1,7 +1,9 @@
 /* eslint-disable no-console */
 import './Tile.css'
 
-import { useCallback, useEffect, useRef } from 'react'
+import {
+  memo, useCallback, useEffect, useRef,
+} from 'react'
 import clsx from 'clsx'
 
 import {
@@ -11,19 +13,21 @@ import {
 
 export const getImageID = (keyName: string) => `img_${keyName}`
 
-export const Tile = ({
-  keyName,
-  src,
-  palette,
-  colorAmount,
-  colorGroup,
-}: {
+type TileType = {
   keyName: string
   src: string
   palette: boolean
   colorAmount: number
   colorGroup: number
-}) => {
+}
+
+const TileForMemo = ({
+  keyName,
+  src,
+  palette,
+  colorAmount,
+  colorGroup,
+}: TileType) => {
   const image = useRef<HTMLImageElement>(null)
   const button = useRef<HTMLDivElement>(null)
   const paletteRef = useRef<HTMLDivElement>(null)
@@ -35,7 +39,12 @@ export const Tile = ({
     const fakeButton = button.current
 
     // Проставляем цвет кнопке
-    fakeButton.style.backgroundColor = mostSaturatedColor
+    if (mostSaturatedColor) {
+      fakeButton.style.backgroundColor = mostSaturatedColor
+    } else {
+      fakeButton.style.backgroundColor = '#e1e3e6'
+      fakeButton.style.color = '#222222'
+    }
 
     // Рисуем палитру
     for (let i = 0; i < rgbList.length; i++) {
@@ -64,26 +73,28 @@ export const Tile = ({
   }, [])
 
   const init = useCallback(async () => {
-    if (!image.current || !image.current.complete) return
+    if (!image.current) return
 
-    const { mostSaturatedColor, rgbList, hslList } = await getPalette({
-      keyName, src, colorAmount, colorGroup,
-    })
+    image.current.onload = async () => {
+      const { mostSaturatedColor, rgbList, hslList } = await getPalette({
+        keyName, src, colorAmount, colorGroup,
+      })
 
-    drawInterface(mostSaturatedColor, rgbList, hslList)
-  // image.current watcher helps to detect its complete state
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [drawInterface, keyName, src, image.current])
+      drawInterface(mostSaturatedColor, rgbList, hslList)
+    }
+  }, [colorAmount, colorGroup, drawInterface, keyName, src])
 
   useEffect(() => {
     init()
   }, [init])
 
   return (
-    <div className="max-w-sm flex flex-col">
+    <div className="sm:basis-1/2 md:basis-1/3 lg:basis-1/4 flex flex-col px-2 box-border">
       <img ref={image} id={getImageID(keyName)} src={src} alt={keyName} className="w-full" />
-      <div ref={button} className="fake-button text-white px-4 py-3 text-base mb-3">Купить</div>
-      <div ref={paletteRef} className={clsx('box-container', { hidden: !palette })} />
+      <div ref={button} className="fake-button text-white px-4 py-3 text-base mb-4">Купить</div>
+      <div ref={paletteRef} className={clsx('box-container mb-4', { hidden: !palette })} />
     </div>
   )
 }
+
+export const Tile = memo(TileForMemo)

@@ -7,13 +7,13 @@ import DefaultLayout from './DefaultLayout'
 // eslint-disable-next-line arrow-body-style
 export const App = () => {
   const [palette, setPalette] = useState(false)
-  const [colorAmount, setColorAmount] = useState(30)
+  const [colorAmount, setColorAmount] = useState(20)
   const [colorGroup, setColorGroup] = useState(40)
   const [isStarted, setIsStarted] = useState(false)
 
   return (
     <DefaultLayout loading={false}>
-      <div className="pb-4 flex items-center gap-6">
+      <div className="py-4 px-1 flex flex-wrap items-center gap-6">
         <label className="flex">
           <input
             type="checkbox"
@@ -33,7 +33,12 @@ export const App = () => {
           Group
         </label>
 
-        <input type="Button" onClick={() => setIsStarted(true)} value="Start" />
+        <button
+          type="button"
+          onClick={() => setIsStarted(true)}
+        >
+          Start
+        </button>
       </div>
 
       {isStarted && (
