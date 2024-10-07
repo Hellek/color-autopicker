@@ -42,7 +42,7 @@ export const rgbToHex = (pixel: RGB): string => {
  * this entire formula can be found in stackoverflow, credits to @icl7126 !!!
  * https://stackoverflow.com/a/44134328/17150245
  */
-export const hslToHex = (hslColor: HSL) => {
+const hslToHex = (hslColor: HSL) => {
   const hslColorCopy = { ...hslColor }
   hslColorCopy.l /= 100
   const a = (hslColorCopy.s * Math.min(hslColorCopy.l, 1 - hslColorCopy.l)) / 100
@@ -58,69 +58,7 @@ export const hslToHex = (hslColor: HSL) => {
   return `#${f(0)}${f(8)}${f(4)}`.toUpperCase()
 }
 
-/**
- * Convert RGB values to HSL
- * This formula can be
- * found here https://www.niwa.nu/2013/05/math-behind-colorspace-conversions-rgb-hsl/
- */
-export const convertRGBtoHSL = (rgbValues: RGB[]) => rgbValues.map((pixel: RGB) => {
-  let hue = 0
-  let saturation = 0
-  let luminance = 0
-
-  // first change range from 0-255 to 0 - 1
-  const redOpposite = pixel.r / 255
-  const greenOpposite = pixel.g / 255
-  const blueOpposite = pixel.b / 255
-
-  const Cmax = Math.max(redOpposite, greenOpposite, blueOpposite)
-  const Cmin = Math.min(redOpposite, greenOpposite, blueOpposite)
-
-  const difference = Cmax - Cmin
-
-  luminance = (Cmax + Cmin) / 2.0
-
-  if (luminance <= 0.5) {
-    saturation = difference / (Cmax + Cmin)
-  } else if (luminance >= 0.5) {
-    saturation = difference / (2.0 - Cmax - Cmin)
-  }
-
-  /**
-   * If Red is max, then Hue = (G-B)/(max-min)
-   * If Green is max, then Hue = 2.0 + (B-R)/(max-min)
-   * If Blue is max, then Hue = 4.0 + (R-G)/(max-min)
-   */
-  const maxColorValue = Math.max(pixel.r, pixel.g, pixel.b)
-
-  if (maxColorValue === pixel.r) {
-    hue = (greenOpposite - blueOpposite) / difference
-  } else if (maxColorValue === pixel.g) {
-    hue = 2.0 + (blueOpposite - redOpposite) / difference
-  } else {
-    hue = 4.0 + (greenOpposite - blueOpposite) / difference
-  }
-
-  hue *= 60 // find the sector of 60 degrees to which the color belongs
-
-  // it should be always a positive angle
-  if (hue < 0) {
-    hue += 360
-  }
-
-  // When all three of R, G and B are equal, we get a neutral color: white, grey or black.
-  if (difference === 0) {
-    return false
-  }
-
-  return {
-    h: Math.round(hue) + 180, // plus 180 degrees because that is the complementary color
-    s: parseFloat(`${saturation * 100}`).toFixed(2),
-    l: parseFloat(`${luminance * 100}`).toFixed(2),
-  }
-})
-
-export const RGBToHSL = (rgb: RGB) => {
+const rgbToHsl = (rgb: RGB) => {
   // make r, g, and b fractions of 1
   const r = rgb.r / 255
   const g = rgb.g / 255
@@ -162,18 +100,7 @@ export const RGBToHSL = (rgb: RGB) => {
   return { h, s, l }
 }
 
-/**
- * Using relative luminance we order the brightness of the colors
- * the fixed values and further explanation about this topic
- * can be found here -> https://en.wikipedia.org/wiki/Luma_(video)
-*/
-export const orderByLuminance = (rgbValues: RGB[]) => {
-  const calculateLuminance = (p: RGB) => 0.2126 * p.r + 0.7152 * p.g + 0.0722 * p.b
-
-  return rgbValues.sort((p1, p2) => calculateLuminance(p2) - calculateLuminance(p1))
-}
-
-export function hexToRgb(hex: string) {
+const hexToRgb = (hex: string) => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
 
   if (!result) throw Error('hexToRgb no result')
@@ -185,6 +112,28 @@ export function hexToRgb(hex: string) {
   }
 }
 
+// Фильтруем палитру (убираем слишком светлые/темные/бледные цвета)
+const paletteFilterHSL = (hsl: HSL) => {
+  if (hsl.s < 20) return false // везде где сатурация ниже 20 не пропускаем
+  if (hsl.s < 30 && (hsl.l > 55 || hsl.l < 35)) return false // если с ниже 30, то смотрим чтобы lightness был в диапазоне меньше 55 и больше 35
+  if (hsl.s < 40 && (hsl.l > 57 || hsl.l < 33)) return false // далее аналогично со сдвигом
+  if (hsl.s < 50 && (hsl.l > 64 || hsl.l < 31)) return false
+  if (hsl.s < 60 && (hsl.l > 70 || hsl.l < 28)) return false
+  if (hsl.s < 70 && (hsl.l > 73 || hsl.l < 21)) return false
+  if (hsl.s < 80 && (hsl.l > 76 || hsl.l < 19)) return false
+  if (hsl.s < 90 && (hsl.l > 79 || hsl.l < 17)) return false
+  if (hsl.l > 85 || hsl.l < 15) return false // если сатурация больше 90, то светимость должна быть ниже 85 и выше 15
+
+  return true
+}
+
+const sortBySaturationHSL = (colorList: HSL[]) => [...colorList].sort((item1, item2) => {
+  if (!item1) return 1
+  if (!item2) return -1
+  if (item2.s === item1.s) return item2.l - item1.l
+  return item2.s - item1.s
+})
+
 export const getPalette = async ({
   keyName, src, colorAmount, colorGroup,
 }: {
@@ -193,7 +142,7 @@ export const getPalette = async ({
   colorAmount: number
   colorGroup: number
 }): Promise<{
-  mostSaturatedColor: string
+  color: string | null
   rgbList: RGB[]
   hslList: HSL[]
 }> => {
@@ -206,42 +155,24 @@ export const getPalette = async ({
   })
 
   // eslint-disable-next-line max-len
-  const colorsListRGB = (rawRes as number[][]).map((item: number[]) => ({ r: item[0], g: item[1], b: item[2] })) as RGB[]
+  const rawColorsListRGB = (rawRes as number[][]).map((item: number[]) => ({ r: item[0], g: item[1], b: item[2] })) as RGB[]
+  const rawColorsListHSL = rawColorsListRGB.map(rgbToHsl)
+  const filteredColorsListHSL = rawColorsListHSL.filter(paletteFilterHSL)
 
-  const HSLFilter = (hsl: HSL) => {
-    if (hsl.s < 20) return false // везде где сатурация ниже 20 не пропускаем
-    if (hsl.s < 30 && (hsl.l > 55 || hsl.l < 35)) return false // если с ниже 30, то смотрим чтобы lightness был в диапазоне меньше 55 и больше 35
-    if (hsl.s < 40 && (hsl.l > 57 || hsl.l < 33)) return false // далее аналогично со сдвигом
-    if (hsl.s < 50 && (hsl.l > 64 || hsl.l < 31)) return false
-    if (hsl.s < 60 && (hsl.l > 70 || hsl.l < 28)) return false
-    if (hsl.s < 70 && (hsl.l > 73 || hsl.l < 21)) return false
-    if (hsl.s < 80 && (hsl.l > 76 || hsl.l < 19)) return false
-    if (hsl.s < 90 && (hsl.l > 79 || hsl.l < 17)) return false
-    if (hsl.l > 85 || hsl.l < 15) return false // если сатурация больше 90, то светимость должна быть ниже 85 и выше 15
+  const colorListSortedBySaturationHSL = sortBySaturationHSL(filteredColorsListHSL)
+  const colorListSortedBySaturationHex = colorListSortedBySaturationHSL.map(hslToHex)
+  const colorListSortedBySaturationRGB = colorListSortedBySaturationHex.map(hexToRgb)
 
-    return true
-  }
+  const mostSaturatedColorRGB = colorListSortedBySaturationRGB[0]
 
-  const colorsListHSL = colorsListRGB.map(RGBToHSL).filter(HSLFilter)
-
-  const colorsListHSLSortedBySaturation = [...colorsListHSL].sort((item1, item2) => {
-    if (!item1) return 1
-    if (!item2) return -1
-    if (item2.s === item1.s) return item2.l - item1.l
-    return item2.s - item1.s
-  })
-
-  const colorsListHexSortedBySaturation = colorsListHSLSortedBySaturation.map(hslToHex)
-
-  const mostSaturatedColor = colorsListHexSortedBySaturation[0]
-  const rgbСolorsListSorted = colorsListHexSortedBySaturation.map(hexToRgb)
+  const mostSaturatedColorHex = mostSaturatedColorRGB ? rgbToHex(mostSaturatedColorRGB) : null
 
   // eslint-disable-next-line no-console
   console.timeEnd(`${keyName} get palette`)
 
   return {
-    mostSaturatedColor,
-    rgbList: rgbСolorsListSorted,
-    hslList: colorsListHSLSortedBySaturation,
+    color: mostSaturatedColorHex,
+    rgbList: colorListSortedBySaturationRGB,
+    hslList: colorListSortedBySaturationHSL,
   }
 }

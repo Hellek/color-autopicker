@@ -32,7 +32,7 @@ const TileForMemo = ({
   const button = useRef<HTMLDivElement>(null)
   const paletteRef = useRef<HTMLDivElement>(null)
 
-  const drawInterface = useCallback((mostSaturatedColor: string, rgbList: RGB[], hslList: HSL[]) => {
+  const drawInterface = useCallback((mostSaturatedColor: string | null, rgbList: RGB[], hslList: HSL[]) => {
     if (!paletteRef.current || !button.current) return
 
     const paletteContainer = paletteRef.current
@@ -76,11 +76,11 @@ const TileForMemo = ({
     if (!image.current) return
 
     image.current.onload = async () => {
-      const { mostSaturatedColor, rgbList, hslList } = await getPalette({
+      const { color, rgbList, hslList } = await getPalette({
         keyName, src, colorAmount, colorGroup,
       })
 
-      drawInterface(mostSaturatedColor, rgbList, hslList)
+      drawInterface(color, rgbList, hslList)
     }
   }, [colorAmount, colorGroup, drawInterface, keyName, src])
 
