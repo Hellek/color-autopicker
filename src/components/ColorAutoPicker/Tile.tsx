@@ -7,9 +7,9 @@ import {
 import clsx from 'clsx'
 
 import {
-  calculateColorDifference,
   getPalette, HSL, RGB, rgbToHex,
 } from '@utils'
+import { calculateColorDifference } from './Tile.utils.'
 
 export const getImageID = (keyName: string) => `img_${keyName}`
 
