@@ -12,6 +12,10 @@ const ONE_THIRD = 1 / 3
 const ONE_SIXTH = 1 / 6
 const HALF = 0.5
 
+function clamp(value: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, value))
+}
+
 // Convert each pixel value (number) to hexadecimal (string) with base 16
 export const rgbToHex = ([r, g, b]: RGBTuple): string => {
   const componentToHex = (c: number) => {
@@ -67,21 +71,21 @@ const rgbToHsl = ([_r, _g, _b]: RGBTuple): HSLTuple => {
 // Function to convert hue to RGB
 function hueToRgb(t1: number, t2: number, t3: number): number {
   let normalizedT3 = t3
-  // Adjust t3 to wrap around within [0, 1]
   if (normalizedT3 < 0) normalizedT3 += 1
   if (normalizedT3 > 1) normalizedT3 -= 1
 
-  // Calculate RGB values based on the hue position
+  let result
   if (normalizedT3 < ONE_SIXTH) {
-    return t1 + (t2 - t1) * 6 * t3 // Interpolate between t1 and t2
+    result = t1 + (t2 - t1) * 6 * normalizedT3
+  } else if (normalizedT3 < 1 / 2) {
+    result = t2
+  } else if (normalizedT3 < 2 / 3) {
+    result = t1 + (t2 - t1) * (2 / 3 - normalizedT3) * 6
+  } else {
+    result = t1
   }
-  if (normalizedT3 < 1 / 2) {
-    return t2 // Return the maximum RGB value
-  }
-  if (normalizedT3 < 2 / 3) {
-    return t1 + (t2 - t1) * (2 / 3 - t3) * 6 // Interpolate back down towards t1
-  }
-  return t1 // Default case, return t1
+
+  return clamp(result, 0, 1)
 }
 
 export function hslToRgb([h, s, l]: HSLTuple): RGBTuple {
@@ -108,7 +112,11 @@ export function hslToRgb([h, s, l]: HSLTuple): RGBTuple {
     : hueToRgb(p, q, normalizedH - ONE_THIRD) // Adjust hue for blue
 
   // Convert from [0, 1] range to [0, 255]
-  return [Math.round(r * RGB_MAX), Math.round(g * RGB_MAX), Math.round(b * RGB_MAX)]
+  return [
+    Math.round(clamp(r * RGB_MAX, 0, RGB_MAX)),
+    Math.round(clamp(g * RGB_MAX, 0, RGB_MAX)),
+    Math.round(clamp(b * RGB_MAX, 0, RGB_MAX)),
+  ]
 }
 
 // Фильтруем палитру (убираем слишком светлые/темные/бледные цвета)
@@ -150,10 +158,6 @@ function contrastRatio(rgb1: RGBTuple, rgb2: RGBTuple) {
   const brightest = Math.max(lum1, lum2)
   const darkest = Math.min(lum1, lum2)
   return (brightest + 0.05) / (darkest + 0.05)
-}
-
-function clamp(value: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, value))
 }
 
 function adjustContrast(bgColor: RGBTuple, textColor: RGBTuple) {
