@@ -84,7 +84,7 @@ function hueToRgb(t1: number, t2: number, t3: number): number {
   return t1 // Default case, return t1
 }
 
-export function hslToRgb([h, s, l]: HSLTuple): [number, number, number] {
+export function hslToRgb([h, s, l]: HSLTuple): RGBTuple {
   // Normalize the hue, saturation, and lightness
   const normalizedH = h / HUE_MAX // Convert from degrees to a 0-1 range
   const normalizedS = s / SATURATION_MAX // Convert from percentage to a 0-1 range
