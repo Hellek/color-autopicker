@@ -1,4 +1,4 @@
-import { prominent } from 'color.js'
+import { prominent } from './prominent'
 
 export type RGBTuple = [r:number, g:number, b:number]
 export type HSLTuple = [h:number, s:number, l:number]
