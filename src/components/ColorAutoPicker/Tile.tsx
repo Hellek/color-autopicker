@@ -47,6 +47,8 @@ const TileForMemo = ({
       fakeButton.style.color = '#222222'
     }
 
+    fakeButton.classList.add('buttonOverlay')
+
     // Рисуем палитру
     for (let i = 0; i < rgbList.length; i++) {
       const hexColor = rgbToHex(rgbList[i])
@@ -92,7 +94,9 @@ const TileForMemo = ({
   return (
     <div className="sm:basis-1/2 md:basis-1/3 lg:basis-1/4 flex flex-col px-2 box-border">
       <img ref={image} id={getImageID(keyName)} src={src} alt={keyName} className="w-full" />
-      <div ref={button} className="fake-button text-white px-4 py-3 text-base mb-4">Купить</div>
+      <div ref={button} className="fake-button text-white px-4 py-3 text-base mb-4">
+        <span className="buttonText">Купить</span>
+      </div>
       <div ref={paletteRef} className={clsx('box-container mb-4', { hidden: !palette })} />
     </div>
   )
