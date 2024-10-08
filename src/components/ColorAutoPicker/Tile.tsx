@@ -7,7 +7,8 @@ import {
 import clsx from 'clsx'
 
 import {
-  getPalette, HSL, RGB, rgbToHex,
+  getPalette, HSLTuple, rgbToHex,
+  RGBTuple,
 } from '@utils'
 import { calculateColorDifference } from './Tile.utils.'
 
@@ -32,7 +33,7 @@ const TileForMemo = ({
   const button = useRef<HTMLDivElement>(null)
   const paletteRef = useRef<HTMLDivElement>(null)
 
-  const drawInterface = useCallback((mostSaturatedColor: string | null, rgbList: RGB[], hslList: HSL[]) => {
+  const drawInterface = useCallback((mostSaturatedColor: string | null, rgbList: RGBTuple[], hslList: HSLTuple[]) => {
     if (!paletteRef.current || !button.current) return
 
     const paletteContainer = paletteRef.current
@@ -49,7 +50,7 @@ const TileForMemo = ({
     // Рисуем палитру
     for (let i = 0; i < rgbList.length; i++) {
       const hexColor = rgbToHex(rgbList[i])
-      const hsl = hslList[i]
+      const [h, s, l] = hslList[i]
 
       if (i > 0) {
         const difference = calculateColorDifference(
@@ -67,7 +68,7 @@ const TileForMemo = ({
       // create the div and text elements for both colors & append it to the document
       const colorElement = document.createElement('div')
       colorElement.style.backgroundColor = hexColor
-      colorElement.appendChild(document.createTextNode(`${hexColor}, h: ${hsl.h}, s: ${hsl.s}, l: ${hsl.l}`))
+      colorElement.appendChild(document.createTextNode(`${hexColor}, h: ${h}, s: ${s}, l: ${l}`))
       paletteContainer.appendChild(colorElement)
     }
   }, [])
