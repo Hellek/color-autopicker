@@ -1,5 +1,8 @@
 import { prominent } from 'color.js'
 
+import { adjustContrast } from './adjustContrast'
+import { hslToRgb } from './hslToRgb'
+
 export type RGB = {
   r: number
   g: number
@@ -20,27 +23,6 @@ export const rgbToHex = (pixel: RGB): string => {
   }
 
   return (`#${componentToHex(pixel.r)}${componentToHex(pixel.g)}${componentToHex(pixel.b)}`).toUpperCase()
-}
-
-/**
- * Convert HSL to Hex
- * this entire formula can be found in stackoverflow, credits to @icl7126 !!!
- * https://stackoverflow.com/a/44134328/17150245
- */
-const hslToHex = (hslColor: HSL) => {
-  const hslColorCopy = { ...hslColor }
-  hslColorCopy.l /= 100
-  const a = (hslColorCopy.s * Math.min(hslColorCopy.l, 1 - hslColorCopy.l)) / 100
-
-  const f = (n: number) => {
-    const k = (n + hslColorCopy.h / 30) % 12
-    const color = hslColorCopy.l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1)
-    return Math.round(255 * color)
-      .toString(16)
-      .padStart(2, '0')
-  }
-
-  return `#${f(0)}${f(8)}${f(4)}`.toUpperCase()
 }
 
 const rgbToHsl = (rgb: RGB) => {
@@ -85,18 +67,6 @@ const rgbToHsl = (rgb: RGB) => {
   return { h, s, l }
 }
 
-const hexToRgb = (hex: string) => {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-
-  if (!result) throw Error('hexToRgb no result')
-
-  return {
-    r: parseInt(result[1], 16),
-    g: parseInt(result[2], 16),
-    b: parseInt(result[3], 16),
-  }
-}
-
 // Фильтруем палитру (убираем слишком светлые/темные/бледные цвета)
 const paletteFilterHSL = (hsl: HSL) => {
   if (hsl.s < 20) return false // везде где сатурация ниже 20 не пропускаем
@@ -132,7 +102,7 @@ export const getPalette = async ({
   hslList: HSL[]
 }> => {
   // eslint-disable-next-line no-console
-  console.time(`${keyName} get palette`)
+  performance.mark('start')
 
   const rawRes = await prominent(src, {
     amount: colorAmount,
@@ -145,18 +115,31 @@ export const getPalette = async ({
   const filteredColorsListHSL = rawColorsListHSL.filter(paletteFilterHSL)
 
   const colorListSortedBySaturationHSL = sortBySaturationHSL(filteredColorsListHSL)
-  const colorListSortedBySaturationHex = colorListSortedBySaturationHSL.map(hslToHex)
-  const colorListSortedBySaturationRGB = colorListSortedBySaturationHex.map(hexToRgb)
 
-  const mostSaturatedColorRGB = colorListSortedBySaturationRGB[0]
+  const colorListSortedBySaturationRGB = colorListSortedBySaturationHSL.map(hsl => {
+    const [r, g, b] = hslToRgb(hsl.h, hsl.s, hsl.l)
 
-  const mostSaturatedColorHex = mostSaturatedColorRGB ? rgbToHex(mostSaturatedColorRGB) : null
+    return { r, g, b }
+  })
+
+  const saturatedColor = colorListSortedBySaturationRGB[0]
+  let contrastedColor = null
+  let adjustedColor = null
+
+  if (saturatedColor) {
+    contrastedColor = adjustContrast([saturatedColor.r, saturatedColor.g, saturatedColor.b], [255, 255, 255])
+  }
+  if (contrastedColor) {
+    adjustedColor = rgbToHex({ r: contrastedColor[0], g: contrastedColor[1], b: contrastedColor[2] })
+  }
 
   // eslint-disable-next-line no-console
-  console.timeEnd(`${keyName} get palette`)
+  performance.mark('end')
+
+  console.log(performance.measure(`${keyName} get palette`, 'start', 'end'))
 
   return {
-    color: mostSaturatedColorHex,
+    color: adjustedColor,
     rgbList: colorListSortedBySaturationRGB,
     hslList: colorListSortedBySaturationHSL,
   }
