@@ -1,5 +1,5 @@
-/* eslint-disable no-promise-executor-return */
-/* eslint-disable max-len */
+import { logPerf } from './log'
+
 type Args = {
   amount: number
   format: string
@@ -107,12 +107,20 @@ const getProminent = (data: Data, args: Args): Output => {
   )
 }
 
-const process = (handler: Handler, item: Item, args?: Partial<Args>): Promise<Output> => new Promise((resolve, reject) => getImageData(getSrc(item))
-  .then(data => {
-    requestIdle(() => resolve(handler(data, getArgs(args))))
-  })
-  .catch(error => reject(error)))
+const process = async (handler: Handler, item: Item, args?: Partial<Args>): Promise<Output> => {
+  performance.mark('start')
+  const data = await getImageData(getSrc(item))
+  performance.mark('end')
+  logPerf(performance.measure('getPalette: getImageData', 'start', 'end'))
 
-const prominent = (item: Item, args?: Partial<Args>) => process(getProminent, item, args)
+  performance.mark('start')
+  const res = handler(data, getArgs(args))
+  performance.mark('end')
+  logPerf(performance.measure('getPalette: getProminent', 'start', 'end'))
 
-export { prominent }
+  return res
+}
+
+const getPalette = (item: Item, args?: Partial<Args>) => process(getProminent, item, args)
+
+export { getPalette }

@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import './Tile.css'
 
 import {
@@ -8,7 +7,7 @@ import {
 import clsx from 'clsx'
 
 import {
-  getPalette, HSLTuple, rgbToHex,
+  extractColors, HSLTuple, rgbToHex,
   RGBTuple,
 } from '@utils'
 import { calculateColorDifference } from './Tile.utils.'
@@ -71,7 +70,7 @@ const TileForMemo = ({
 
   const init = useCallback(async () => {
     try {
-      const { color, rgbList, hslList } = await getPalette({
+      const { color, rgbList, hslList } = await extractColors({
         keyName, src, colorAmount, colorGroup,
       })
 
@@ -89,8 +88,8 @@ const TileForMemo = ({
   return (
     <div className="sm:basis-1/2 md:basis-1/3 lg:basis-1/4 flex flex-col px-2 box-border">
       <img id={getImageID(keyName)} src={src} alt={keyName} className="w-full" />
-      <div style={{ backgroundColor: backgroundColor ?? '' }} className={`fake-button text-white px-4 py-3 text-base mb-4 ${backgroundColor ? 'buttonOverlay' : ''}`}>
-        <span style={{ color: textColor }} className="buttonText">Купить</span>
+      <div style={{ backgroundColor: backgroundColor ?? '' }} className={`fake-button text-white px-4 py-3 text-base mb-4 ${backgroundColor ? 'button-overlay' : ''}`}>
+        <span style={{ color: textColor }} className="button-text">Купить</span>
       </div>
       <div ref={paletteRef} className={clsx('box-container mb-4', { hidden: !palette })} />
     </div>

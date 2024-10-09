@@ -1,4 +1,4 @@
-import { prominent } from './prominent'
+import { getPalette } from './getPalette'
 
 export type RGBTuple = [r:number, g:number, b:number]
 export type HSLTuple = [h:number, s:number, l:number]
@@ -95,7 +95,10 @@ export function hslToRgb([h, s, l]: HSLTuple): RGBTuple {
   const normalizedL = l / LIGHTNESS_MAX // Convert from percentage to a 0-1 range
 
   // Calculate the chroma (q) and the midpoint (p)
-  const q = normalizedL < HALF ? normalizedL * (1 + normalizedS) : normalizedL + normalizedS - (normalizedL * normalizedS) // Calculate the maximum RGB value
+  const q = normalizedL < HALF
+    ? normalizedL * (1 + normalizedS)
+    : normalizedL + normalizedS - (normalizedL * normalizedS) // Calculate the maximum RGB value
+
   const p = 2 * normalizedL - q // Calculate the minimum RGB value
 
   // Calculate RGB values based on adjusted hue
@@ -178,7 +181,7 @@ function adjustContrast(bgColor: RGBTuple, textColor: RGBTuple) {
   return newBgColor
 }
 
-export const getPalette = async ({
+export const extractColors = async ({
   src, colorAmount, colorGroup,
 }: {
   keyName: string
@@ -190,12 +193,11 @@ export const getPalette = async ({
   rgbList: RGBTuple[]
   hslList: HSLTuple[]
 }> => {
-  const colorListRGB = (await prominent(src, {
+  const colorListRGB = (await getPalette(src, {
     amount: colorAmount,
     group: colorGroup,
   })) as RGBTuple[]
 
-  // eslint-disable-next-line max-len
   const rawColorsListHSL = colorListRGB.map(rgbToHsl)
   const filteredColorsListHSL = rawColorsListHSL.filter(paletteFilterHSL)
   const colorListSortedBySaturationHSL = sortBySaturationHSL(filteredColorsListHSL)

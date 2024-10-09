@@ -4,7 +4,6 @@ import { ColorAutoPicker } from '@components/ColorAutoPicker/ColorAutoPicker'
 
 import DefaultLayout from './DefaultLayout'
 
-// eslint-disable-next-line arrow-body-style
 export const App = () => {
   const [palette, setPalette] = useState(false)
   const [colorAmount, setColorAmount] = useState(20)

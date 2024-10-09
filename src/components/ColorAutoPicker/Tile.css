@@ -5,22 +5,22 @@
   align-items: center;
 }
 
-.buttonOverlay {
+button-overlay {
   position: relative;
 }
 
-.buttonOverlay::before {
-  content: '';
+button-overlay::before {
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(184, 193, 204, .12);
+  background-color: rgb(184 193 204 / 0.12);
   z-index: 1;
 }
 
-.buttonText {
+.button-text {
   position: relative;
   z-index: 2;
 }
