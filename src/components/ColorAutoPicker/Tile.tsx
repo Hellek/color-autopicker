@@ -34,7 +34,7 @@ const TileForMemo = ({
 }: TileType) => {
   const paletteRef = useRef<HTMLDivElement>(null)
   const [backgroundColor, setBackgroundColor] = useState<string | null>(null)
-  const [textColor, setTextColor] = useState('#000')
+  const [textColor, setTextColor] = useState('#fff')
 
   const drawInterface = useCallback((mostSaturatedColor: string | null, rgbList: RGBTuple[], hslList: HSLTuple[]) => {
     if (!paletteRef.current) return
