@@ -51,24 +51,25 @@ const group = (number: number, grouping: number): number => {
   return Math.min(grouped, 255)
 }
 
-const getImageData = (src: Url): Promise<Data> => fetch(src)
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Network response was not ok')
-    }
-    return response.blob()
-  })
-  .then(blob => new Promise<Data>((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      const arrayBuffer = reader.result as ArrayBuffer
-      const data = new Uint8ClampedArray(arrayBuffer)
-      resolve(data)
-    }
+const getImageData = (src: Url): Promise<Data> => new Promise((resolve, reject) => {
+  const canvas = document.createElement('canvas')
+  const context = <CanvasRenderingContext2D>canvas.getContext('2d')
+  const img = new Image()
 
-    reader.onerror = () => reject(Error('Blob reading failed.'))
-    reader.readAsArrayBuffer(blob)
-  }))
+  img.onload = () => {
+    canvas.height = img.height
+    canvas.width = img.width
+    context.drawImage(img, 0, 0)
+
+    const { data } = context.getImageData(0, 0, img.width, img.height)
+
+    resolve(data)
+  }
+
+  img.onerror = () => reject(Error('Image loading failed.'))
+  img.crossOrigin = ''
+  img.src = src
+})
 
 const getProminent = (data: Data, args: Args): Output => {
   const gap = 4 * args.sample

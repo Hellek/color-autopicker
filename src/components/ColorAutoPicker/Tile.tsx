@@ -3,6 +3,7 @@ import './Tile.css'
 
 import {
   memo, useCallback, useEffect, useRef,
+  useState,
 } from 'react'
 import clsx from 'clsx'
 
@@ -22,6 +23,8 @@ type TileType = {
   colorGroup: number
 }
 
+const fallbackBackgroundColor = '#e1e3e6'
+
 const TileForMemo = ({
   keyName,
   src,
@@ -29,25 +32,16 @@ const TileForMemo = ({
   colorAmount,
   colorGroup,
 }: TileType) => {
-  const image = useRef<HTMLImageElement>(null)
-  const button = useRef<HTMLDivElement>(null)
   const paletteRef = useRef<HTMLDivElement>(null)
+  const [backgroundColor, setBackgroundColor] = useState<string | null>(null)
+  const [textColor, setTextColor] = useState('#000')
 
   const drawInterface = useCallback((mostSaturatedColor: string | null, rgbList: RGBTuple[], hslList: HSLTuple[]) => {
-    if (!paletteRef.current || !button.current) return
+    if (!paletteRef.current) return
 
     const paletteContainer = paletteRef.current
-    const fakeButton = button.current
 
-    // Проставляем цвет кнопке
-    if (mostSaturatedColor) {
-      fakeButton.style.backgroundColor = mostSaturatedColor
-    } else {
-      fakeButton.style.backgroundColor = '#e1e3e6'
-      fakeButton.style.color = '#222222'
-    }
-
-    fakeButton.classList.add('buttonOverlay')
+    setBackgroundColor(mostSaturatedColor ?? fallbackBackgroundColor)
 
     // Рисуем палитру
     for (let i = 0; i < rgbList.length; i++) {
@@ -76,14 +70,15 @@ const TileForMemo = ({
   }, [])
 
   const init = useCallback(async () => {
-    if (!image.current) return
-
-    image.current.onload = async () => {
+    try {
       const { color, rgbList, hslList } = await getPalette({
         keyName, src, colorAmount, colorGroup,
       })
 
       drawInterface(color, rgbList, hslList)
+    } catch (e) {
+      setBackgroundColor(fallbackBackgroundColor)
+      setTextColor('#222')
     }
   }, [colorAmount, colorGroup, drawInterface, keyName, src])
 
@@ -93,9 +88,9 @@ const TileForMemo = ({
 
   return (
     <div className="sm:basis-1/2 md:basis-1/3 lg:basis-1/4 flex flex-col px-2 box-border">
-      <img ref={image} id={getImageID(keyName)} src={src} alt={keyName} className="w-full" />
-      <div ref={button} className="fake-button text-white px-4 py-3 text-base mb-4">
-        <span className="buttonText">Купить</span>
+      <img id={getImageID(keyName)} src={src} alt={keyName} className="w-full" />
+      <div style={{ backgroundColor: backgroundColor ?? '' }} className={`fake-button text-white px-4 py-3 text-base mb-4 ${backgroundColor ? 'buttonOverlay' : ''}`}>
+        <span style={{ color: textColor }} className="buttonText">Купить</span>
       </div>
       <div ref={paletteRef} className={clsx('box-container mb-4', { hidden: !palette })} />
     </div>

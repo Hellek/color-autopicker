@@ -171,7 +171,6 @@ function adjustContrast(bgColor: RGBTuple, textColor: RGBTuple) {
 
     // If the background color is fully clamped and ratio is still not reached, break to prevent infinite loop
     if (newBgColor.every(value => value === 255)) {
-      console.warn('Unable to reach the required contrast ratio with the background color fully clamped.')
       break
     }
   }
@@ -180,7 +179,7 @@ function adjustContrast(bgColor: RGBTuple, textColor: RGBTuple) {
 }
 
 export const getPalette = async ({
-  keyName, src, colorAmount, colorGroup,
+  src, colorAmount, colorGroup,
 }: {
   keyName: string
   src: string
@@ -191,9 +190,6 @@ export const getPalette = async ({
   rgbList: RGBTuple[]
   hslList: HSLTuple[]
 }> => {
-  // eslint-disable-next-line no-console
-  performance.mark('start')
-
   const colorListRGB = (await prominent(src, {
     amount: colorAmount,
     group: colorGroup,
@@ -215,11 +211,6 @@ export const getPalette = async ({
   if (contrastedColor) {
     adjustedColor = rgbToHex(contrastedColor)
   }
-
-  // eslint-disable-next-line no-console
-  performance.mark('end')
-
-  console.log(performance.measure(`${keyName} get palette`, 'start', 'end'))
 
   return {
     color: adjustedColor,
