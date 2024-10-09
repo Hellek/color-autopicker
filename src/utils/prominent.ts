@@ -19,6 +19,16 @@ type Input = (Hex | Rgb)[]
 
 type Item = Url | HTMLImageElement
 
+const requestIdle = (cb: () => unknown) => {
+  if ('requestIdleCallback' in window) {
+    window.requestIdleCallback(() => cb())
+  } else if ('requestAnimationFrame' in window) {
+    (window as Window).requestAnimationFrame(() => cb())
+  } else {
+    cb()
+  }
+}
+
 const getSrc = (item: Item): string => (typeof item === 'string' ? item : item.src)
 
 const getArgs = ({
@@ -59,11 +69,14 @@ const getImageData = (src: Url): Promise<Data> => new Promise((resolve, reject) 
   img.onload = () => {
     canvas.height = img.height
     canvas.width = img.width
-    context.drawImage(img, 0, 0)
 
-    const { data } = context.getImageData(0, 0, img.width, img.height)
+    requestIdle(() => {
+      context.drawImage(img, 0, 0)
 
-    resolve(data)
+      const { data } = context.getImageData(0, 0, img.width, img.height)
+
+      resolve(data)
+    })
   }
 
   img.onerror = () => reject(Error('Image loading failed.'))
@@ -95,7 +108,9 @@ const getProminent = (data: Data, args: Args): Output => {
 }
 
 const process = (handler: Handler, item: Item, args?: Partial<Args>): Promise<Output> => new Promise((resolve, reject) => getImageData(getSrc(item))
-  .then(data => resolve(handler(data, getArgs(args))))
+  .then(data => {
+    requestIdle(() => resolve(handler(data, getArgs(args))))
+  })
   .catch(error => reject(error)))
 
 const prominent = (item: Item, args?: Partial<Args>) => process(getProminent, item, args)
