@@ -1,5 +1,3 @@
-import { useEffect, useMemo, useState } from 'react'
-
 import { Tile } from './Tile'
 
 type ImageRecord = {
@@ -93,37 +91,17 @@ export const ColorAutoPicker = ({
   palette: boolean
   colorAmount: number
   colorGroup: number
-}) => {
-  // примеры https://www.figma.com/design/h2KbpDWQWYogZPVuC6ZZl9/Ads-%C3%97-Newsfeed?node-id=4617-44778
-  const [images, setImages] = useState<ImageRecord[]>([imagesList[0]])
-  const allImages = useMemo<ImageRecord[]>(() => imagesList, [])
-
-  useEffect(() => {
-    const intervalId = setTimeout(() => {
-      if (images.length === allImages.length) {
-        clearInterval(intervalId)
-        return
-      }
-
-      setImages([
-        ...images,
-        allImages[images.length],
-      ])
-    }, 1000)
-  }, [allImages, images])
-
-  return (
-    <div className="flex flex-wrap">
-      {images.map(img => (
-        <Tile
-          key={img.name}
-          keyName={img.name}
-          src={img.src}
-          palette={palette}
-          colorAmount={colorAmount}
-          colorGroup={colorGroup}
-        />
-      ))}
-    </div>
-  )
-}
+}) => (
+  <div className="flex flex-wrap">
+    {imagesList.map(img => (
+      <Tile
+        key={img.name}
+        keyName={img.name}
+        src={img.src}
+        palette={palette}
+        colorAmount={colorAmount}
+        colorGroup={colorGroup}
+      />
+    ))}
+  </div>
+)
