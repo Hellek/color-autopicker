@@ -22,7 +22,7 @@ type TileType = {
   colorGroup: number
 }
 
-const fallbackBackgroundColor = '#e1e3e6'
+const fallbackBackgroundColor = '#2688eb'
 
 const TileForMemo = ({
   keyName,
@@ -33,7 +33,7 @@ const TileForMemo = ({
 }: TileType) => {
   const paletteRef = useRef<HTMLDivElement>(null)
   const [backgroundColor, setBackgroundColor] = useState<string | null>(null)
-  const [textColor, setTextColor] = useState('#fff')
+  const textColor = '#fff'
 
   const drawInterface = useCallback((mostSaturatedColor: string | null, rgbList: RGBTuple[], hslList: HSLTuple[]) => {
     if (!paletteRef.current) return
@@ -77,9 +77,10 @@ const TileForMemo = ({
       drawInterface(color, rgbList, hslList)
     } catch (e) {
       setBackgroundColor(fallbackBackgroundColor)
-      setTextColor('#222')
     }
   }, [colorAmount, colorGroup, drawInterface, keyName, src])
+
+  const useOverlay = () => backgroundColor && (backgroundColor !== fallbackBackgroundColor)
 
   useEffect(() => {
     init()
@@ -88,7 +89,7 @@ const TileForMemo = ({
   return (
     <div className="sm:basis-1/2 md:basis-1/3 lg:basis-1/4 flex flex-col px-2 box-border">
       <img id={getImageID(keyName)} src={src} alt={keyName} className="w-full" />
-      <div style={{ backgroundColor: backgroundColor ?? '' }} className={`fake-button text-white px-4 py-3 text-base mb-4 ${backgroundColor ? 'button-overlay' : ''}`}>
+      <div style={{ backgroundColor: backgroundColor ?? '' }} className={`fake-button text-white px-4 py-3 text-base mb-4 ${useOverlay() ? 'button-overlay' : ''}`}>
         <span style={{ color: textColor }} className="button-text">Купить</span>
       </div>
       <div ref={paletteRef} className={clsx('box-container mb-4', { hidden: !palette })} />
