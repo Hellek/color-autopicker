@@ -5,11 +5,11 @@
   align-items: center;
 }
 
-button-overlay {
+.button-overlay {
   position: relative;
 }
 
-button-overlay::before {
+.button-overlay::before {
   content: "";
   position: absolute;
   top: 0;
