@@ -200,7 +200,7 @@ export const extractColors = async ({
 
   const rawColorsListHSL = colorListRGB.map(rgbToHsl)
   const filteredColorsListHSL = rawColorsListHSL.filter(paletteFilterHSL)
-  const colorListSortedBySaturationHSL = sortBySaturationHSL(filteredColorsListHSL)
+  const colorListSortedBySaturationHSL = sortBySaturationHSL(filteredColorsListHSL).map(([h, s]) => [h, s, 40] as HSLTuple)
   const colorListSortedBySaturationRGB = colorListSortedBySaturationHSL.map(hslToRgb)
 
   const saturatedColor = colorListSortedBySaturationRGB[0]
