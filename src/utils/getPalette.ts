@@ -111,12 +111,12 @@ const process = async (handler: Handler, item: Item, args?: Partial<Args>): Prom
   performance.mark('start')
   const data = await getImageData(getSrc(item))
   performance.mark('end')
-  logPerf(performance.measure('getPalette: getImageData', 'start', 'end'))
+  logPerf(performance.measure('getImageData', 'start', 'end'))
 
   performance.mark('start')
   const res = handler(data, getArgs(args))
   performance.mark('end')
-  logPerf(performance.measure('getPalette: getProminent', 'start', 'end'))
+  logPerf(performance.measure('getProminent', 'start', 'end'))
 
   return res
 }
