@@ -71,11 +71,15 @@ const getImageData = (src: Url): Promise<Data> => new Promise((resolve, reject) 
     canvas.width = img.width
 
     requestIdle(() => {
+      performance.mark('start')
       context.drawImage(img, 0, 0)
 
       const { data } = context.getImageData(0, 0, img.width, img.height)
 
       resolve(data)
+
+      performance.mark('end')
+      logPerf(performance.measure('getImageData', 'start', 'end'))
     })
   }
 
@@ -108,10 +112,7 @@ const getProminent = (data: Data, args: Args): Output => {
 }
 
 const process = async (handler: Handler, item: Item, args?: Partial<Args>): Promise<Output> => {
-  performance.mark('start')
   const data = await getImageData(getSrc(item))
-  performance.mark('end')
-  logPerf(performance.measure('getImageData', 'start', 'end'))
 
   performance.mark('start')
   const res = handler(data, getArgs(args))
