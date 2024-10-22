@@ -30,21 +30,37 @@ export const ColorAutoPicker = ({
   palette,
   colorAmount,
   colorGroup,
+  ownFileSrc,
 }: {
   palette: boolean
   colorAmount: number
   colorGroup: number
-}) => (
-  <div className="flex flex-wrap">
-    {imagesList.map(img => (
+  ownFileSrc?: string
+}) => {
+  if (ownFileSrc) {
+    return (
       <Tile
-        key={img.name}
-        keyName={img.name}
-        src={img.src}
+        keyName="ownFile"
+        src={ownFileSrc}
         palette={palette}
         colorAmount={colorAmount}
         colorGroup={colorGroup}
       />
-    ))}
-  </div>
-)
+    )
+  }
+
+  return (
+    <div className="flex flex-wrap">
+      {imagesList.map(img => (
+        <Tile
+          key={img.name}
+          keyName={img.name}
+          src={img.src}
+          palette={palette}
+          colorAmount={colorAmount}
+          colorGroup={colorGroup}
+        />
+      ))}
+    </div>
+  )
+}
