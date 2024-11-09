@@ -5,9 +5,13 @@
   "author": "Roman Basharin",
   "private": true,
   "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Hellek/color-autopicker"
+  },
   "engines": {
     "node": "18",
-    "npm": "9"
+    "npm": "9 || 10"
   },
   "scripts": {
     "serve": "webpack serve --mode=development",
@@ -28,12 +32,6 @@
       "npm run eslint:fix --max-warnings 0"
     ]
   },
-  "browserslist": [
-    ">0.2%",
-    "not dead",
-    "not IE 11",
-    "not op_mini all"
-  ],
   "dependencies": {
     "clsx": "1.2.1",
     "color.js": "1.2.0",
@@ -88,5 +86,10 @@
     "webpack": "5.76.2",
     "webpack-cli": "4.10.0",
     "webpack-dev-server": "4.9.0"
-  }
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not op_mini all"
+  ]
 }
