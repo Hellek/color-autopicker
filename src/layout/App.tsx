@@ -8,8 +8,7 @@ export const App = () => {
   const [palette, setPalette] = useState(false)
   const [colorAmount, setColorAmount] = useState(20)
   const [colorGroup, setColorGroup] = useState(40)
-  const [isStarted, setIsStarted] = useState(false)
-  const [ownFileSrc, setOwnFileSrc] = useState<string>()
+  const [imageSources, setimageSources] = useState<string[]>([])
 
   return (
     <DefaultLayout loading={false}>
@@ -21,36 +20,37 @@ export const App = () => {
               checked={palette}
               onChange={() => setPalette(!palette)}
             />
-            Палитра
+            Show palette
           </label>
 
           <label className="flex">
             <input type="number" className="max-w-[32px] mr-2" value={colorAmount} onChange={e => setColorAmount(Number(e.target.value))} />
-            Amount
+            Max palette size
           </label>
 
           <label className="flex">
             <input type="number" className="max-w-[32px] mr-2" value={colorGroup} onChange={e => setColorGroup(Number(e.target.value))} />
-            Group
+            Palette algo sensivity
           </label>
-
-          <button
-            type="button"
-            onClick={() => setIsStarted(true)}
-          >
-            Start
-          </button>
         </div>
         <div>
           <label className="flex">
-            <span className="bg-green-800 hover:bg-green-700 px-2 py-1 rounded-md cursor-pointer">Своё изображение</span>
+            <span className="bg-green-800 hover:bg-green-700 px-2 py-1 rounded-md cursor-pointer">Download images</span>
             <input
               type="file"
               className="hidden"
+              multiple
               onChange={e => {
                 if (e.target.files) {
-                  setOwnFileSrc(URL.createObjectURL(e.target.files[0]))
-                  setIsStarted(true)
+                  const { files } = e.target
+                  const sources: string[] = []
+
+                  for (let index = 0; index < files.length; index++) {
+                    const f = files[index]
+                    sources.push(URL.createObjectURL(f))
+                  }
+
+                  setimageSources(sources)
                 }
               }}
             />
@@ -58,12 +58,12 @@ export const App = () => {
         </div>
       </div>
 
-      {isStarted && (
+      {imageSources.length > 0 && (
         <ColorAutoPicker
           palette={palette}
           colorAmount={colorAmount}
           colorGroup={colorGroup}
-          ownFileSrc={ownFileSrc}
+          imageSources={imageSources}
         />
       )}
     </DefaultLayout>

@@ -12,10 +12,10 @@ import {
 } from '@utils'
 import { calculateColorDifference } from './Tile.utils.'
 
-export const getImageID = (keyName: string) => `img_${keyName}`
+export const getImageID = (keyName: number) => `img_${keyName}`
 
 type TileType = {
-  keyName: string
+  id: number
   src: string
   palette: boolean
   colorAmount: number
@@ -25,7 +25,7 @@ type TileType = {
 const fallbackBackgroundColor = '#2688eb'
 
 const TileForMemo = ({
-  keyName,
+  id,
   src,
   palette,
   colorAmount,
@@ -71,14 +71,14 @@ const TileForMemo = ({
   const init = useCallback(async () => {
     try {
       const { color, rgbList, hslList } = await extractColors({
-        keyName, src, colorAmount, colorGroup,
+        src, colorAmount, colorGroup,
       })
 
       drawInterface(color, rgbList, hslList)
     } catch (e) {
       setBackgroundColor(fallbackBackgroundColor)
     }
-  }, [colorAmount, colorGroup, drawInterface, keyName, src])
+  }, [colorAmount, colorGroup, drawInterface, src])
 
   const useOverlay = () => backgroundColor && (backgroundColor !== fallbackBackgroundColor)
 
@@ -88,9 +88,9 @@ const TileForMemo = ({
 
   return (
     <div className="sm:basis-1/2 md:basis-1/3 lg:basis-1/4 flex flex-col px-2 box-border">
-      <img id={getImageID(keyName)} src={src} alt={keyName} className="w-full" />
+      <img id={getImageID(id)} src={src} alt={`Description for ${id}`} className="w-full" />
       <div style={{ backgroundColor: backgroundColor ?? '' }} className={`fake-button text-white px-4 py-3 text-base mb-4 ${useOverlay() ? 'button-overlay' : ''}`}>
-        <span style={{ color: textColor }} className="button-text">Купить</span>
+        <span style={{ color: textColor }} className="button-text">{backgroundColor}</span>
       </div>
       <div ref={paletteRef} className={clsx('box-container mb-4', { hidden: !palette })} />
     </div>

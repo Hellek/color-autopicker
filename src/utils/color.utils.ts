@@ -184,7 +184,6 @@ function adjustContrast(bgColor: RGBTuple, textColor: RGBTuple) {
 export const extractColors = async ({
   src, colorAmount, colorGroup,
 }: {
-  keyName: string
   src: string
   colorAmount: number
   colorGroup: number
