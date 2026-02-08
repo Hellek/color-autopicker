@@ -131,6 +131,11 @@ module.exports = (webpackEnv, { mode }) => {
     new HtmlWebpackPlugin({
       template: path.join(__dirname, './public/index.html'),
     }),
+    // Для GitHub Pages: при любом неизвестном пути отдаётся 404.html — загружается SPA, роутер обрабатывает URL
+    new HtmlWebpackPlugin({
+      template: path.join(__dirname, './public/index.html'),
+      filename: '404.html',
+    }),
     new CopyPlugin({
       patterns: [
         {
