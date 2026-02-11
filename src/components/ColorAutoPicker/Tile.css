@@ -1,8 +1,39 @@
+.box-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
 .box-container div {
-  padding: 8px;
+  padding: 0.75rem 1rem;
   display: flex;
   justify-items: center;
   align-items: center;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-family: ui-monospace, monospace;
+  min-height: 2.5rem;
+  transition: all 0.15s ease;
+}
+
+.palette-color-item {
+  padding: 0.75rem 1rem;
+  display: flex;
+  justify-items: center;
+  align-items: center;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-family: ui-monospace, monospace;
+  min-height: 2.5rem;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.palette-color-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+  opacity: 0.95;
 }
 
 .button-overlay {
@@ -18,9 +49,13 @@
   height: 100%;
   background-color: rgb(184 193 204 / 0.12);
   z-index: 1;
+  border-radius: 0.5rem;
 }
 
 .button-text {
   position: relative;
   z-index: 2;
+  display: block;
+  text-align: center;
+  word-break: break-all;
 }

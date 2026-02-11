@@ -1,0 +1,1 @@
+export { FileUploadArea } from './FileUploadArea'
