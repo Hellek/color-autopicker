@@ -33,7 +33,7 @@ export const App = () => {
     }
 
     // Добавляем новые файлы к существующим, а не заменяем их
-    setImageSources((prevSources) => [...prevSources, ...newSources])
+    setImageSources(prevSources => [...prevSources, ...newSources])
   }, [])
 
   const handleRemoveImage = useCallback(
